@@ -33,9 +33,31 @@ RUN source $NVM_DIR/nvm.sh \
 ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
-# confirm installation
+# confirm NODE installation
 RUN node -v
 RUN npm -v
+
+# Maven installation
+ENV MAVEN_VERSION 3.5.0
+
+# update dpkg repositories
+RUN apt-get update
+
+# install wget
+RUN apt-get install -y wget
+
+# get maven 3.2.2
+RUN wget --no-verbose -O /tmp/apache-maven-$MAVEN_VERSION.tar.gz http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz
+
+# install maven
+RUN tar xzf /tmp/apache-maven-$MAVEN_VERSION.tar.gz -C /opt/
+RUN ln -s /opt/apache-maven-$MAVEN_VERSION /opt/maven
+RUN ln -s /opt/maven/bin/mvn /usr/local/bin
+RUN rm -f /tmp/apache-maven-$MAVEN_VERSION.tar.gz
+ENV MAVEN_HOME /opt/maven
+
+# verify maven installation
+RUN mvn --version
 
 USER jenkins
 ENV JAVA_OPTS="-Xmx8192m"
